@@ -1,0 +1,26 @@
+import tensorflow as tf
+from matplotlib import pyplot as plt
+
+# Define the path to the image and the corresponding annotation
+image_path = '/path/to/image.jpg'
+annotation_path = '/path/to/annotation.png'
+
+# Load the image and annotation
+image = tf.io.read_file(image_path)
+image = tf.image.decode_jpeg(image, channels=3)
+annotation = tf.io.read_file(annotation_path)
+annotation = tf.image.decode_png(annotation, channels=1)
+
+# Resize the image and annotation to the desired dimensions
+image_height, image_width, _ = image.shape
+annotation = tf.image.resize(annotation, (image_height, image_width))
+
+# Display the original image and annotation
+plt.figure(figsize=(10, 5))
+plt.subplot(121)
+plt.imshow(image)
+plt.title('Original Image')
+plt.subplot(122)
+plt.imshow(tf.squeeze(annotation))
+plt.title('Annotation')
+plt.show()
