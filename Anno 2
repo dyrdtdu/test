@@ -1,0 +1,52 @@
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Load image
+img_path = 'path/to/image.jpg'
+img = tf.io.read_file(img_path)
+img = tf.image.decode_jpeg(img, channels=3)
+img = tf.image.resize(img, [224, 224])
+
+# Create annotations
+annotations = {
+    'lane_1': {
+        'bbox': [50, 50, 100, 150], # [xmin, ymin, width, height]
+        'class': 1
+    },
+    'lane_2': {
+        'bbox': [150, 50, 100, 150],
+        'class': 1
+    },
+    'band_1': {
+        'bbox': [50, 50, 200, 20],
+        'class': 2
+    },
+    'band_2': {
+        'bbox': [50, 180, 200, 20],
+        'class': 2
+    }
+}
+
+# Create target tensor
+target = np.zeros([len(annotations), 5])
+for i, (key, value) in enumerate(annotations.items()):
+    xmin, ymin, width, height = value['bbox']
+    target[i, :] = [xmin, ymin, xmin+width, ymin+height, value['class']]
+
+# Create bounding box tensor
+boxes = tf.convert_to_tensor(target[:, :4], dtype=tf.float32)
+
+# Create class tensor
+classes = tf.convert_to_tensor(target[:, 4], dtype=tf.int32)
+
+# Plot image with annotations
+plt.imshow(img.numpy())
+ax = plt.gca()
+for i, bbox in enumerate(boxes):
+    rect = plt.Rectangle((bbox[0], bbox[1]), bbox[2]-bbox[0], bbox[3]-bbox[1],
+                          linewidth=2, edgecolor='r', facecolor='none')
+    ax.add_patch(rect)
+    plt.text(bbox[0], bbox[1]-5, classes[i].numpy(),
+             bbox=dict(facecolor='red', alpha=0.5))
+plt.show()
